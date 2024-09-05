@@ -207,7 +207,7 @@ def plot_stacked_revenue_by_property_platform(df):
     # Step 2: Create the stacked bar chart
     fig = px.bar(aggregated_df, x='property_name', y='revenue', color='platform',
                  title='Stacked Revenue of Property by Platform',
-                 color_discrete_map={'airbnb': 'red', 'booking': 'blue', 'vrbo': 'purple'})
+                 color_discrete_map={'airbnb': 'red', 'booking.com': 'blue', 'vrbo': 'purple'})
 
     return fig
 
