@@ -145,11 +145,12 @@ def combine_and_transform_datasets(filtered_test, filtered_data_test):
     # Convert 'checkout_date' from object to datetime64[ns]
     combined_dataset['checkout_date'] = pd.to_datetime(combined_dataset['checkout_date'])
 
+    data = combined_dataset
     # Convert platform category booking.com
-    combined_dataset['platform'] = combined_dataset['platform'].replace('booking', 'booking.com')
+    data['platform'] = data['platform'].replace('booking', 'booking.com')
 
     # Return the transformed combined dataset
-    return combined_dataset
+    return data
 
 # KPI Calculations
 def calculate_kpis(df):
