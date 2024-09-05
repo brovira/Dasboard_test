@@ -139,16 +139,23 @@ def combine_and_transform_datasets(filtered_test, filtered_data_test):
     # Combine the two datasets
     combined_dataset = pd.concat([filtered_test, filtered_data_test], ignore_index=True)
 
-    # Convert 'booking_date' from object to datetime64[ns]
-    combined_dataset['booking_date'] = pd.to_datetime(combined_dataset['booking_date'])
+    # Check if 'booking_date' column exists before conversion
+    if 'booking_date' in combined_dataset.columns:
+        combined_dataset['booking_date'] = pd.to_datetime(combined_dataset['booking_date'])
+    else:
+        raise KeyError("'booking_date' column not found in the dataset")
 
-    # Convert 'checkout_date' from object to datetime64[ns]
-    combined_dataset['checkout_date'] = pd.to_datetime(combined_dataset['checkout_date'])
+    # Check if 'checkout_date' column exists before conversion
+    if 'checkout_date' in combined_dataset.columns:
+        combined_dataset['checkout_date'] = pd.to_datetime(combined_dataset['checkout_date'])
+    else:
+        raise KeyError("'checkout_date' column not found in the dataset")
 
-    #data = combined_dataset
-
-    # Convert platform category 
-    #data['platform'] = data['platform'].replace('booking', 'booking.com')
+    # Check if 'platform' column exists before replacing values
+    if 'platform' in combined_dataset.columns:
+        combined_dataset['platform'] = combined_dataset['platform'].replace('booking', 'booking.com')
+    else:
+        raise KeyError("'platform' column not found in the dataset")
 
     # Return the transformed combined dataset
     return combined_dataset
