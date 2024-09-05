@@ -198,25 +198,57 @@ def plot_nights_booked_percentage_per_platform(df):
     return fig
 
 def plot_stacked_revenue_by_property_platform(df):
-    fig = px.bar(df, x='property_name', y='revenue', color='platform', title='Stacked Revenue of Property by Platform',
-                 color_discrete_map={'airbnb': 'red', 'booking.com': 'blue', 'vrbo': 'purple'})
+    # Step 1: Aggregate the data
+    aggregated_df = df.groupby(['property_name', 'platform'], as_index=False)['revenue'].sum()
+
+    # Step 2: Create the stacked bar chart
+    fig = px.bar(aggregated_df, x='property_name', y='revenue', color='platform',
+                 title='Stacked Revenue of Property by Platform',
+                 color_discrete_map={'airbnb': 'red', 'booking': 'blue', 'vrbo': 'purple'})
+
     return fig
 
 def plot_monthly_revenue_line(df):
+    # Ensure date columns are in datetime format
+    df['checkin_date'] = pd.to_datetime(df['checkin_date'])
+    df['checkout_date'] = pd.to_datetime(df['checkout_date'])
+
+    # Calculate the start of the month for grouping
+    df['month'] = df['checkin_date'].dt.to_period('M').dt.start_time  # Convert to the first day of the month
+
+    # Calculate the monthly revenue per property
     monthly_revenue = df.groupby(['month', 'property_name'])['revenue'].sum().reset_index()
+
+    # Create the line chart
     fig = px.line(monthly_revenue, x='month', y='revenue', color='property_name', title='Monthly Revenue per Property')
+
+    # Update y-axis to start at 0
+    fig.update_yaxes(title='Revenue (€)',
+                     range=[0, monthly_revenue['revenue'].max() * 1.1]
+                     ,tickangle=90)
+
+    # Format x-axis to show month names and ensure chronological order
+    fig.update_xaxes(
+        title='Month',
+        dtick="M1",
+        tickformat="%B %Y",  # Show month name and year
+        categoryorder="category ascending"  # Ensure chronological order
+    )
+
     return fig
 
 def plot_monthly_occupancy_rate(df):
     # Ensure date columns are in datetime format
     df.loc[:, 'checkin_date'] = pd.to_datetime(df['checkin_date'])
     df.loc[:, 'checkout_date'] = pd.to_datetime(df['checkout_date'])
-    
+
     # Calculate the start of the month for grouping
     df.loc[:, 'month'] = df['checkin_date'].dt.to_period('M').dt.start_time
 
     # Filter cancelled reservations
-    df = df[df['status'] != 'cancelled']
+    #df = df[df['status'] != 'cancelled']
+    df = df[~df['status'].isin(['cancelled', 'denied'])]
+
 
     # Calculate occupancy for each property each month
     monthly_occupancy = df.groupby(['month', 'property_name']).apply(
@@ -228,7 +260,7 @@ def plot_monthly_occupancy_rate(df):
                   title='Monthly Occupancy Rate per Property')
 
     # Update y-axis to start at 0
-    fig.update_yaxes(title='Occupancy Rate', tickformat=".0%", range=[0, 1])
+    fig.update_yaxes(title='Occupancy Rate', tickformat=".0%", range=[0, 1.01],tickangle=90)
 
     # Format x-axis to show month names and ensure chronological order
     fig.update_xaxes(
@@ -244,10 +276,10 @@ def plot_monthly_adr_line(df):
     # Ensure date columns are in datetime format
     df['checkin_date'] = pd.to_datetime(df['checkin_date'])
     df['checkout_date'] = pd.to_datetime(df['checkout_date'])
-    
+
     # Calculate the start of the month for grouping
     df['month'] = df['checkin_date'].dt.to_period('M').dt.start_time  # Convert to the first day of the month
-    
+
     # Calculate the total revenue and total nights per month per property
     monthly_data = df.groupby(['month', 'property_name']).agg({
         'revenue': 'sum',
