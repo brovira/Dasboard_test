@@ -146,7 +146,8 @@ def combine_and_transform_datasets(filtered_test, filtered_data_test):
     combined_dataset['checkout_date'] = pd.to_datetime(combined_dataset['checkout_date'])
 
     data = combined_dataset
-    # Convert platform category booking
+
+    # Convert platform category 
     data['platform'] = data['platform'].replace('booking', 'booking.com')
 
     # Return the transformed combined dataset
